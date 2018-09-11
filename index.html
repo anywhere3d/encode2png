@@ -7,6 +7,7 @@
         var debugMode = true;
         var t =  Date.now();
         var HTMLLoader = new Image();
+	HTMLLoader.crossOrigin = "anonymous";
         HTMLLoader.onload = function() {
             var html = decodeFromPNG(this);
             document.write( html );
