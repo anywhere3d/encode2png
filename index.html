@@ -1,0 +1,44 @@
+<html>
+<head>
+
+    <title>anywhere3d.png</title>
+
+    <script>
+        var debugMode = true;
+        var t =  Date.now();
+        var HTMLLoader = new Image();
+        HTMLLoader.onload = function() {
+            var html = decodeFromPNG(this);
+            document.write( html );
+            var time = Date.now() - t;
+            console.log( ["Html load time:", time, "msec."].join(" ") );
+        };
+        HTMLLoader.src = "./resources/encode-decode-to-png.min.html.png";
+
+        function decodeFromPNG(img){
+            var str = "";
+            var canvas = document.createElement("canvas");
+			canvas.width = img.width;
+			canvas.height = img.height;
+			canvas.getContext("2d").drawImage(img, 0, 0);
+            var data = canvas.getContext("2d").getImageData(0, 0, canvas.width, canvas.height).data;
+            var t = Date.now();
+			for ( var i = 0; i < data.length; i+=4){
+				var r = data[i+0];  // i:ctx data offset.
+				var g = data[i+1];  // i:ctx data offset.
+				var b = data[i+2];  // i:ctx data offset.
+				var a = data[i+3];  // i:ctx data offset.
+				if ( r > 0 && r < 128 ) str += String.fromCharCode( r );
+				if ( g > 0 && g < 128 ) str += String.fromCharCode( g );
+				if ( b > 0 && b < 128 ) str += String.fromCharCode( b );
+                if ( r == 0 && g == 0 && b == 0 ) break;
+			}
+			console.log( "Decoded time:", Date.now() - t, "msec.");
+            return str;
+        }
+
+    </script>
+
+</head>
+<body></body>
+</html>
