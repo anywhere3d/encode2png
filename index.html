@@ -1,0 +1,383 @@
+<html>
+
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="Description" content="" />
+        <meta name="Keywords"  content="" />
+        <title>encode/decode to png v.0.08</title>
+        <link rel="stylesheet" type="text/css" href="./css/bootstrap.css" />
+        <style>
+            html, body { width: 100%; height: 100%; }
+            body { 
+                background-color: #000000; margin:0px; padding:0px; 
+                color:#ffffff; arial, san-serif; overflow:auto; 
+            }
+            textarea {
+              width:100%; padding:10px 10px; color:#ffffff;
+              font-family:monospace; background-color:#202020;
+              border:0px; resize:none;
+            }
+            #header {margin:10px; font-family:monospace;}
+            .green {color:green;}
+        </style>
+
+        <script src="js/jquery.min.js"></script>
+
+    </head>
+
+    <body>
+
+        <div id="header" class="col-md-12">
+            <div class="col-md-2">
+            //  <span class="green">ENCODE/DECODE TO PNG visa versa.</span><br>
+            //  <span class="green">Developed by DoubleChok.</span><br>
+            //  <span class="green">Copyright - 2017 - anywhere3d.</span><br>
+            //  <span class="green">Licensed under MIT License.</span><br>
+            </div>
+            <div class="col-md-5">
+                Encode/Decode Compress/Decompress html, css, js, json, text files to png images.<br>
+                How it works: On encode reads input string and create a png image. On decode reads 
+                input pixels and decode to string. TODO: (1 DONE) <s>Could use all (3) channels to perform a more 
+                compressive ratio.</s> (2) Batch proccessing. TO REMEMBER: encoding/decoding uses pixels. 
+                Not dataURL or binary sting data. For best optimazation use <a href="http://advsys.net/ken/utils.htm" target="_blank">
+                <b>PNGOut(1.00)</b></a> tool by <a href="http://advsys.net/ken/" target="_blank"><b>Ken Silverman</b></a> 
+                in XnView Filters.<br>Have a look also at: <a href="http://www.libpng.org/pub/png/" target="_blank"><b>PNG Home Site.</b></a>
+                The mother of all PNG sites. 
+            </div>
+            <div class="col-md-5">
+            </div>
+        </div>
+
+
+        <form id="controls-form">
+            <input type="hidden" id="file-name" value="untitled">
+            <div class="col-md-12" style="padding:0px; margin-bottom:10px;">
+            <!-- ENCODE -->
+                <div class="col-md-6">
+                    <div class="btn-toolbar" role="toolbar" style="padding:0px;">
+                        <div class="col-md-12" style="padding:4px;">
+                            <span id="label-encode">Encode to PNG</span>
+                        </div>
+                         <div class="btn-group pull-right" style="margin-bottom:12px;">
+                            <a href="#" id="fixed" class="btn btn-danger size-set" role="button">Fixed</a>
+                            <a href="#" id="width" class="btn btn-warning size-set" role="button">Width</a>
+                            <a href="#" id="equal" class="btn btn-success size-set" role="button">Equal</a>
+                            <a href="#" id="encode" class="btn btn-default" role="submit">Encode</a>
+                            <a href="#" id="save-img" class="btn btn-primary" role="button">Save image</a>
+                        </div>
+                        <div class="input-group pull-right" style="margin-bottom:12px;">
+                            <a href="#" id="file-input-button" class="btn btn-info" role="button">Choose Source File</a>
+                            <input type="file" id="file-input" class="source-input" style="display:none;">
+                        </div>                        
+                    </div>
+                </div>
+            <!-- DECODE -->
+                <div class="col-md-6">
+                    <div class="btn-toolbar" role="toolbar" style="padding:0px;">
+                        <div class="col-md-12" style="padding:4px;">
+                            <span id="label-decode">Decode from PNG</span>
+                        </div>
+                        <div class="btn-group" style="margin-bottom:12px;">
+                            <a href="#" id="img-input-button" class="btn btn-info" role="button" form="reset-form">Choose Source Image</a>
+                            <input type="file" id="img-input" class="source-input" style="display:none;">
+                            <a href="#" id="decode" class="btn btn-default" role="submit">Decode</a>
+                            <a href="#" id="save-txt" class="btn btn-success" role="button">Save text</a>
+                        </div>
+
+                        <div class="btn-group pull-right" style="margin-bottom:12px;">
+                            <a href="#" id="clear-all" class="btn btn-default" role="button">Clear</a>
+                        </div>
+                        <div class="btn-group pull-right" style="width:140px; margin-bottom:12px;">
+                            <select id="compression" class="form-control">
+                                <ul>
+                                    <option value="">compression</option>
+                                    <option value="grayscale">grayscale</option>
+                                    <option value="alphaonly">transparent</option>
+                                    <option value="grayalpha">gray transparent</option>
+                                    <option value="truecolor" selected>true color</option>
+                                    <option value="fullcolor">color transparent</option>
+                                </ul>
+                            </select>
+                        </div>
+                        <div class="input-group pull-right" style="width:120px; margin-bottom:12px;">
+                            <span id="label-x" class="input-group-addon" aria-describedby="w">W:</span>
+                            <input type="number" id="w" class="form-control" min="32" max="4096" step="16" value="1024">
+                        </div>
+                        <div class="input-group pull-right" style="width:120px; margin-bottom:12px;">
+                            <span id="label-y" class="input-group-addon" aria-describedby="h">H:</span>
+                            <input type="number" id="h" class="form-control" min="32" max="4096" step="16" value="512">
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="col-md-12" style="padding:0px; margin-bottom:20px;">
+            <!-- ENCODE -->
+                <div class="col-md-6">
+                    <style>#code-input{ margin:2px 2px 12px 2px; padding:10px 10px 10px 10px; }</style>
+                    <div id="label-input">String Input</div>
+                    <textarea name="input" id="code-input" rows="5">
+                        Your code here for exemple var CANNON = {}... 
+                        and simply save image with red border
+                        you can use photoshop to convert 8bit grayscale png
+                        Ascii character range need for javascript is from 32 to 127
+                    </textarea>
+                </div>
+            <!-- DECODE -->
+                <div class="col-md-6">
+                    <style>#code-output{ margin:2px 2px 12px 2px; padding:10px 10px 10px 10px; }</style>
+                    <div id="label-output">DataURL Output</div>
+                    <textarea name="output" id="code-output" rows="5" disabled></textarea>
+                </div>
+            </div>
+
+            <div class="col-md-12 text-center">
+                <style>#png{border-color:red;}</style>
+                <img id="png" class="img-thumbnail">
+            </div>
+    
+        </form>
+
+        <div id="footer" class="col-md-12" style="padding:20px;"></div>
+
+        <script>
+
+            debugMode = true;
+            var canvas = document.createElement("canvas");  // canvas for endcoded/decoded.
+            var ctx = canvas.getContext("2d");              // Canvas Rendering Context 2D.
+            debugMode && console.log("ctx:", ctx);
+            var title = $("#title")[0];
+            var filename = $("#file-name")[0];   // name of input file.
+            var length = 0;                      // length of encode pixels.
+            var mode = "equal";                  // canvas dimension mode.
+            var compression = "truecolor";       // compression mode (TODO).
+            var size = [1024, 512];              // 512 KB (size block), canvas dimensions.
+            var png = $("#png")[0];              // image preview of png encoded data.
+            var input = $("#code-input")[0];     // textarea of input text data.
+            var output = $("#code-output")[0];   // textarea of output dataURL encoded data.
+            var fileinput = $("#file-input")[0]; // file input of files (hidden).
+            var imageinput = $("#img-input")[0]; // file input of image (hidden).            
+            $("#file-input-button").on("click", function(e){
+                e.preventDefault();
+                $("#controls-form")[0].reset();
+                $("#file-input")[0].click();
+                return false;
+            });
+            
+            $("#img-input-button").on("click", function(e){
+                e.preventDefault();
+                $("#controls-form")[0].reset();
+                $("#img-input")[0].click();
+                return false;
+            });
+            
+            $("#controls-form").on("reset", function(){
+                png.src = "";
+                length = 0;                      // length of encoded pixels.
+                mode = "equal";                  // encoding size mode.
+                compression = "truecolor";       // compression rate.
+                size = [1024, 512];              // 512 KB (block).
+                filename.value = "untitled";
+            });
+
+            $("#file-input").on("change", importAsString);
+
+            $("#img-input").on("change", importAsDataUrl);            
+
+            $(".size-set").on("click", function(e){
+                e.preventDefault();
+                mode = e.currentTarget.id; 
+                encode();
+                return false;
+            });
+
+            $("#compression").on("change", function(e){
+                compression = e.currentTarget.value;
+            });
+
+            $("#encode").on("click", function(e){
+                e.preventDefault();
+                encode();
+                return false;
+            });            
+
+            $("#decode").on("click", function(e){
+                e.preventDefault();
+                input.value = decodeFromPNG(png);
+                return false;
+            });
+
+            $("#save-img").on("click", function(e){
+                e.preventDefault();
+                saveimg();
+                return false;
+            });
+
+            $("#save-txt").on("click", function(e){
+                e.preventDefault();
+                savetxt();
+                return false;
+            });
+            
+            $("#clear-all").on("click", function(){
+                $("#controls-form")[0].reset();
+            });
+
+            function importAsString(e){
+                if (e.currentTarget.files.length == 0) return;
+                var file = e.currentTarget.files[0];
+            //  debugMode && console.log("file:", file);
+                $("#file-name")[0].value = file.name;
+                $("#footer")[0].textContent = file.name;
+                debugMode && console.log("#file-name:", $("#file-name")[0].value);
+                var reader = new FileReader();
+                debugMode && console.log("reader:", reader);
+                reader.onloadstart = function(event) {
+                    if (!!input) input.value = "";
+                };
+                reader.onload = function(event) {
+                    debugMode && console.log("on load:");
+                };
+                reader.onloadend = function(event) {
+                    if (!!input) input.value = reader.result;
+                };
+                reader.readAsBinaryString(file);
+            }
+
+            function importAsDataUrl(e){
+                if (e.currentTarget.files.length == 0) return;
+                var file = e.currentTarget.files[0];
+            //  debugMode && console.log("file:", file);
+                $("#file-name")[0].value = file.name;
+                $("#footer")[0].textContent = file.name;
+                debugMode && console.log("#file-name:", $("#file-name")[0].value);
+                var reader = new FileReader();
+                debugMode && console.log("reader:", reader);
+                reader.onloadstart = function(event) {
+                    if (!!input) input.value = "";
+                };
+                reader.onload = function(event) {
+                    debugMode && console.log("on load:");
+                };
+                reader.onloadend = function(event) {
+                    if (!!output) output.value = reader.result;
+                    if (!!png) png.src = reader.result;
+                };
+                reader.readAsDataURL(file);
+            }
+
+            function encode(){
+                var str = input.value;
+                var x = $("#w")[0].value;  // canvas width value.
+                var y = $("#h")[0].value;  // canvas height value.
+
+                length = Math.ceil(str.length / 3);  //  pixels length.
+
+                switch(mode) {
+                
+                    case "fixed": 
+                        size = [ x, y ];
+                        break;
+                        
+                    case "width":
+                        var s = Math.ceil( length / x );
+                        size = [ x, s ];
+                        break;
+                
+                    case "equal":
+                        var s = Math.ceil( Math.sqrt(length) );
+                        size = [s, s];
+                        break;
+                        
+                    default:
+                    //  Default block at 512 KB.
+                        var s = Math.ceil( length / 1024  );
+                        size = [1024, s];
+                }
+
+                encodeToPNG(str);
+                output.value = canvas.toDataURL();
+                png.src = output.value;
+
+                return false;
+            }
+
+            function encodeToPNG(str) {
+                canvas.width = size[0];
+                canvas.height = size[1];
+                var imagedata = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                var data = imagedata.data;
+                var t = Date.now();
+                for ( var i=0, n=0; i < data.length; i+=4, n+=3) {
+                    data[i+0] = str.charCodeAt(n+0);  // i:ctx data offset, n:string offset.
+                    data[i+1] = str.charCodeAt(n+1);  // i:ctx data offset, n:string offset.
+                    data[i+2] = str.charCodeAt(n+2);  // i:ctx data offset, n:string offset.
+                    data[i+3] = 255;    // i:ctx data offset, alpha must not be transparent.
+                }
+                console.log( "Encode time:", Date.now() - t, "msec.");
+                imagedata.data = data;
+                ctx.putImageData(imagedata, 0, 0);
+            }
+
+            function decodeFromPNG(img){
+                var str = "";
+    			canvas.width = img.width;
+    			canvas.height = img.height;
+    			canvas.getContext("2d").drawImage(img, 0, 0);
+                var data = canvas.getContext("2d").getImageData(0, 0, canvas.width, canvas.height).data;
+                var t = Date.now();
+    			for ( var i = 0; i < data.length; i+=4){
+    				var r = data[i+0];  // i:ctx data offset.
+    				var g = data[i+1];  // i:ctx data offset.
+    				var b = data[i+2];  // i:ctx data offset.
+    				var a = data[i+3];  // i:ctx data offset.
+    				if ( r < 128 ) str += String.fromCharCode( r );
+    				if ( g < 128 ) str += String.fromCharCode( g );
+    				if ( b < 128 ) str += String.fromCharCode( b );
+    			}
+    			console.log( "Decoded time:", Date.now() - t, "msec.");
+                debugMode && console.log(str);
+                return str;
+            }
+
+            function saveimg(){
+                var name = $("#file-name")[0].value;
+                var a = document.createElement("a");
+                a.href = canvas.toDataURL("image/png");
+                a.download = [name, "png"].join(".");
+                a.onclick = function(event){ 
+                    document.body.removeChild(event.target); 
+                };
+                debugMode && console.log("a.href:", a.href);
+                document.body.appendChild(a); 
+                a.click();
+            }
+
+            function savetxt(){
+                var text = input.value;
+                var name = $("#file-name")[0].value;
+                var blob = new Blob([text], {"type":"application/octet-stream"});
+                var a = document.createElement("a");
+                a.href = window.URL.createObjectURL(blob);
+                a.download = [name, "txt"].join(".");
+                a.onclick = function(event){ 
+                    document.body.removeChild(event.target); 
+                };
+                debugMode && console.log("a.href:", a.href);
+                document.body.appendChild(a); 
+                a.click();
+            }
+
+        </script>
+
+    </body>
+
+</html>
+
+
+
+
+
+
